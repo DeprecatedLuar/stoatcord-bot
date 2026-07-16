@@ -79,67 +79,56 @@ export function mapDiscordRoles(guild: Guild): RoleMapping[] {
 function discordToRevoltBits(
   discordPerms: Readonly<PermissionsBitField>
 ): number {
-  let bits = 0;
+  // Stoat permission bits go up to 1n<<36n, which overflows JS's 32-bit
+  // bitwise operators (`|=` on `number` truncates to Int32). Accumulate
+  // with BigInt and convert to Number only once at the end — the max
+  // possible value is well under Number.MAX_SAFE_INTEGER.
+  let bits = 0n;
 
   // Core permission mappings: Discord → Revolt
-  if (discordPerms.has("ManageChannels"))
-    bits |= Number(PermissionBit.ManageChannel);
-  if (discordPerms.has("ManageGuild"))
-    bits |= Number(PermissionBit.ManageServer);
+  if (discordPerms.has("ManageChannels")) bits |= PermissionBit.ManageChannel;
+  if (discordPerms.has("ManageGuild")) bits |= PermissionBit.ManageServer;
   if (discordPerms.has("ManageRoles")) {
-    bits |= Number(PermissionBit.ManageRole);
-    bits |= Number(PermissionBit.ManagePermissions);
-    bits |= Number(PermissionBit.AssignRoles);
+    bits |= PermissionBit.ManageRole;
+    bits |= PermissionBit.ManagePermissions;
+    bits |= PermissionBit.AssignRoles;
   }
-  if (discordPerms.has("KickMembers"))
-    bits |= Number(PermissionBit.KickMembers);
-  if (discordPerms.has("BanMembers"))
-    bits |= Number(PermissionBit.BanMembers);
+  if (discordPerms.has("KickMembers")) bits |= PermissionBit.KickMembers;
+  if (discordPerms.has("BanMembers")) bits |= PermissionBit.BanMembers;
   if (discordPerms.has("ModerateMembers"))
-    bits |= Number(PermissionBit.TimeoutMembers);
+    bits |= PermissionBit.TimeoutMembers;
   if (discordPerms.has("ChangeNickname"))
-    bits |= Number(PermissionBit.ChangeNickname);
+    bits |= PermissionBit.ChangeNickname;
   if (discordPerms.has("ManageNicknames")) {
-    bits |= Number(PermissionBit.ManageNicknames);
-    bits |= Number(PermissionBit.ChangeAvatar);
-    bits |= Number(PermissionBit.RemoveAvatars);
+    bits |= PermissionBit.ManageNicknames;
+    bits |= PermissionBit.ChangeAvatar;
+    bits |= PermissionBit.RemoveAvatars;
   }
-  if (discordPerms.has("ViewChannel"))
-    bits |= Number(PermissionBit.ViewChannel);
+  if (discordPerms.has("ViewChannel")) bits |= PermissionBit.ViewChannel;
   if (discordPerms.has("ReadMessageHistory"))
-    bits |= Number(PermissionBit.ReadMessageHistory);
-  if (discordPerms.has("SendMessages"))
-    bits |= Number(PermissionBit.SendMessage);
+    bits |= PermissionBit.ReadMessageHistory;
+  if (discordPerms.has("SendMessages")) bits |= PermissionBit.SendMessage;
   if (discordPerms.has("ManageMessages"))
-    bits |= Number(PermissionBit.ManageMessages);
+    bits |= PermissionBit.ManageMessages;
   if (discordPerms.has("ManageWebhooks")) {
-    bits |= Number(PermissionBit.ManageWebhooks);
-    bits |= Number(PermissionBit.Masquerade);
+    bits |= PermissionBit.ManageWebhooks;
+    bits |= PermissionBit.Masquerade;
   }
   if (discordPerms.has("CreateInstantInvite"))
-    bits |= Number(PermissionBit.InviteOthers);
-  if (discordPerms.has("EmbedLinks"))
-    bits |= Number(PermissionBit.SendEmbeds);
-  if (discordPerms.has("AttachFiles"))
-    bits |= Number(PermissionBit.UploadFiles);
-  if (discordPerms.has("AddReactions"))
-    bits |= Number(PermissionBit.React);
-  if (discordPerms.has("Connect"))
-    bits |= Number(PermissionBit.Connect);
-  if (discordPerms.has("Speak"))
-    bits |= Number(PermissionBit.Speak);
-  if (discordPerms.has("Stream"))
-    bits |= Number(PermissionBit.Video);
-  if (discordPerms.has("MuteMembers"))
-    bits |= Number(PermissionBit.MuteMembers);
-  if (discordPerms.has("DeafenMembers"))
-    bits |= Number(PermissionBit.DeafenMembers);
-  if (discordPerms.has("MoveMembers"))
-    bits |= Number(PermissionBit.MoveMembers);
+    bits |= PermissionBit.InviteOthers;
+  if (discordPerms.has("EmbedLinks")) bits |= PermissionBit.SendEmbeds;
+  if (discordPerms.has("AttachFiles")) bits |= PermissionBit.UploadFiles;
+  if (discordPerms.has("AddReactions")) bits |= PermissionBit.React;
+  if (discordPerms.has("Connect")) bits |= PermissionBit.Connect;
+  if (discordPerms.has("Speak")) bits |= PermissionBit.Speak;
+  if (discordPerms.has("Stream")) bits |= PermissionBit.Video;
+  if (discordPerms.has("MuteMembers")) bits |= PermissionBit.MuteMembers;
+  if (discordPerms.has("DeafenMembers")) bits |= PermissionBit.DeafenMembers;
+  if (discordPerms.has("MoveMembers")) bits |= PermissionBit.MoveMembers;
   if (discordPerms.has("ManageGuildExpressions"))
-    bits |= Number(PermissionBit.ManageCustomisation);
+    bits |= PermissionBit.ManageCustomisation;
 
-  return bits;
+  return Number(bits);
 }
 
 /**
