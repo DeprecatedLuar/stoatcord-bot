@@ -734,6 +734,13 @@ async function runMigration(
     guild,
   };
 
+  // Guards against a stale/late "Cancel Migration" click landing after
+  // execution has already settled — the collector's own `time`/`max`
+  // window isn't enough since a click already in flight when we call
+  // `.stop()` can still fire the "collect" handler.
+  let migrationFinished = false;
+  let cancelCollector: { stop: (reason?: string) => void } | undefined;
+
   // Show cancel button during execution (only for live runs)
   if (!isDryRun) {
     const cancelRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -745,14 +752,26 @@ async function runMigration(
 
     // Listen for cancel button in background
     const message = await interaction.fetchReply();
-    const cancelCollector = message.createMessageComponentCollector({
+    const collector = message.createMessageComponentCollector({
       componentType: ComponentType.Button,
       filter: (i) => i.user.id === interaction.user.id && i.customId === "migrate_abort",
       time: 600_000, // 10 minutes
       max: 1,
     });
+    cancelCollector = collector;
 
-    cancelCollector.on("collect", async (i) => {
+    collector.on("collect", async (i) => {
+      if (migrationFinished) {
+        // Migration already completed — this click was stale (client
+        // hadn't re-rendered our final edit yet). Ack silently and
+        // leave the completed results embed alone.
+        try {
+          await i.deferUpdate();
+        } catch {
+          // Ignore
+        }
+        return;
+      }
       abortController.abort();
       try {
         await i.update({
@@ -817,6 +836,8 @@ async function runMigration(
       migrationOptions
     );
   } catch (err) {
+    migrationFinished = true;
+    cancelCollector?.stop();
     if (err instanceof MigrationCancelledError) {
       await interaction.editReply({
         embeds: [
@@ -834,6 +855,8 @@ async function runMigration(
     }
     throw err;
   }
+  migrationFinished = true;
+  cancelCollector?.stop();
 
   // --- Build results embed ---
   if (isDryRun) {
