@@ -15,6 +15,8 @@ bun run start
 - `bun run start` — Run the bot
 - `bun run dev` — Run with auto-reload (--watch)
 - `bun run typecheck` — TypeScript type checking
+- `bun run test` — Run the test suite
+- `bun run test:watch` — Run tests in watch mode
 
 ## Architecture
 
@@ -53,4 +55,12 @@ src/
 - `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
 - `WebSocket` is built-in. Don't use `ws`.
 - Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Use `bun test` to run tests.
+
+## Testing
+
+- Colocated: `foo.ts` → `foo.test.ts`. No `tests/` directory.
+- Pure/deterministic logic only — no mocking discord.js gateway, live network, or `bun:sqlite` beyond `:memory:`.
+- `export` a private helper to make it testable if it's pure; don't restructure for it.
+- No shared `test-utils.ts` until duplication actually appears.
+- Covered: `bridge/format.ts`, `migration/roles.ts`, `migration/channels.ts`, `push/relay.ts`, `db/store.ts`, `archive/import.ts`.
+- Out of scope: live-connection modules (`bridge/relay.ts`, `discord/events.ts`, `stoat/websocket.ts`, `migration/wizard.ts`, `api/server.ts`, `push/fcm.ts`, `push/webpush.ts`), `env.ts`.
