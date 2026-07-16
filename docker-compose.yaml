@@ -1,0 +1,24 @@
+services:
+  stoatcord-bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      STOAT_API_BASE: ${STOAT_API_BASE:-https://api.stoat.chat/0.8}
+      STOAT_WS_URL: ${STOAT_WS_URL:-wss://events.stoat.chat}
+      STOAT_CDN_URL: ${STOAT_CDN_URL:-https://cdn.stoatusercontent.com}
+      STOAT_AUTUMN_URL: ${STOAT_AUTUMN_URL:-https://autumn.stoat.chat}
+      API_PORT: 3210
+      DB_PATH: .data/stoatcord.db
+      FIREBASE_SERVICE_ACCOUNT: .data/firebase-service-account.json
+      PUSH_ENABLED: ${PUSH_ENABLED:-true}
+      PUSH_BOT_API_URL: ${PUSH_BOT_API_URL:-http://localhost:3210}
+    ports:
+      - "${API_PORT:-3210}:3210"
+    volumes:
+      - ./.data:/app/.data
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3210/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

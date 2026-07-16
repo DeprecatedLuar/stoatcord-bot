@@ -1,9 +1,6 @@
 .env
 .env.*
-*.db
-*.db-wal
-*.db-shm
-firebase-service-account.json
+.data/
 node_modules
 output/
 .git

@@ -35,13 +35,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 
-# SQLite database
-*.db
-*.db-wal
-*.db-shm
-
-# Firebase service account key (NEVER commit)
-firebase-service-account.json
+# Persistent app data (SQLite db, Firebase service account key — NEVER commit)
+.data/
 
 # Dev utility scripts (local-only)
 check-all.ts
