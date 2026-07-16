@@ -811,7 +811,7 @@ export class Store {
 }
 
 /** Generate a 6-char alphanumeric claim code using crypto-secure randomness */
-function generateCode(): string {
+export function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I confusion
   const randomBytes = new Uint8Array(6);
   crypto.getRandomValues(randomBytes);
@@ -823,7 +823,7 @@ function generateCode(): string {
 }
 
 /** Generate a 44-char base64url push token for per-user push API authentication */
-function generatePushToken(): string {
+export function generatePushToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   // base64url encoding (no padding, URL-safe)
@@ -834,7 +834,7 @@ function generatePushToken(): string {
 }
 
 /** Generate a 32-char hex API token for per-guild API authentication */
-function generateApiToken(): string {
+export function generateApiToken(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   return Array.from(bytes)

@@ -23,13 +23,14 @@ const USER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const CHANNEL_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 /** Validate push endpoint URL to prevent SSRF attacks */
-function isAllowedPushEndpoint(endpoint: string): boolean {
+export function isAllowedPushEndpoint(endpoint: string): boolean {
   try {
     const url = new URL(endpoint);
     // Must be HTTPS (allow HTTP only for well-known UP distributors)
     if (url.protocol !== "https:") return false;
-    // Block loopback, link-local, and private IP ranges
-    const host = url.hostname.toLowerCase();
+    // Block loopback, link-local, and private IP ranges.
+    // IPv6 hostnames come bracketed (e.g. "[::1]") — strip before comparing.
+    const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
     if (
       host === "localhost" ||
       host === "127.0.0.1" ||

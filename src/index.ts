@@ -242,6 +242,7 @@ async function main(): Promise<void> {
           /^\/api\/guilds\/(\d+)\/channels$/
         );
         if (channelMatch && method === "GET") {
+          if (!discordClient) return Response.json({ error: "Discord not connected" }, { status: 503, headers: corsHeaders });
           const guildId = channelMatch[1]!;
           return addHeaders(
             await handleGuildChannels(discordClient, guildId),
@@ -251,6 +252,7 @@ async function main(): Promise<void> {
 
         // Route: GET /api/links — list all active bridge links
         if (url.pathname === "/api/links" && method === "GET") {
+          if (!discordClient) return Response.json({ error: "Discord not connected" }, { status: 503, headers: corsHeaders });
           return addHeaders(
             handleListLinks(store, discordClient),
             corsHeaders
@@ -262,6 +264,7 @@ async function main(): Promise<void> {
           /^\/api\/links\/guild\/(\d+)$/
         );
         if (guildLinksMatch && method === "GET") {
+          if (!discordClient) return Response.json({ error: "Discord not connected" }, { status: 503, headers: corsHeaders });
           const guildId = guildLinksMatch[1]!;
           return addHeaders(
             handleGuildLinks(store, discordClient, guildId),
@@ -271,6 +274,7 @@ async function main(): Promise<void> {
 
         // Route: POST /api/links — create a new bridge link
         if (url.pathname === "/api/links" && method === "POST") {
+          if (!discordClient) return Response.json({ error: "Discord not connected" }, { status: 503, headers: corsHeaders });
           const body = (await req.json()) as {
             discordChannelId: string;
             stoatChannelId: string;
@@ -749,7 +753,7 @@ async function main(): Promise<void> {
     cancelAllPending(); // reject any in-flight approval promises
     server.stop();
     stoatWs.disconnect();
-    discordClient.destroy();
+    discordClient?.destroy();
     store.close();
     process.exit(0);
   };

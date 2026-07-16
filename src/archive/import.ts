@@ -293,7 +293,7 @@ async function sendArchivedMessage(
 }
 
 /** Format a Date as "YYYY-MM-DD HH:MM AM/PM UTC" — locale-independent */
-function formatTimestamp(date: Date): string {
+export function formatTimestamp(date: Date): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
   const d = String(date.getUTCDate()).padStart(2, "0");
